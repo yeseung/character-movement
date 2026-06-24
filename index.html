@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>WASD 캐릭터 이동</title>
+    <style>
+        *{box-sizing:border-box}
+        html,body{
+            margin:0;
+            width:100%;
+            height:100%;
+            overflow:hidden;
+            background:#eef3f7;
+        }
+        #game{
+            position:relative;
+            width:100vw;
+            height:100vh;
+            background:#f7fbff;
+        }
+        #player{
+            position:absolute;
+            width:120px;
+            height:160px;
+            background-image:url("stand.png");
+            background-size:480px 160px;
+            background-repeat:no-repeat;
+            transform:translate(-50%,-50%);
+        }
+        .info{
+            position:fixed;
+            top:15px;
+            left:15px;
+            background:#fff;
+            padding:10px 14px;
+            border-radius:12px;
+            font-family:sans-serif;
+            font-size:14px;
+            box-shadow:0 4px 15px rgba(0,0,0,.12);
+        }
+        button{
+            margin-left:8px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game">
+    <div id="player"></div>
+</div>
+
+<div class="info">
+    WASD 이동
+    <button onclick="openFullScreen()">전체화면</button>
+</div>
+
+<script>
+    const player = document.getElementById("player");
+
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+
+    let speed = 4;
+    let direction = 0;
+    let moving = false;
+    let frame = 0;
+    let tick = 0;
+
+    const keys = {};
+
+    const DIR = {
+        s: 0, // 앞쪽
+        a: 1, // 왼쪽
+        w: 2, // 뒤쪽
+        d: 3  // 오른쪽
+    };
+
+    document.addEventListener("keydown", e => {
+        const key = e.key.toLowerCase();
+        if (["w","a","s","d"].includes(key)) {
+            keys[key] = true;
+        }
+    });
+
+    document.addEventListener("keyup", e => {
+        const key = e.key.toLowerCase();
+        keys[key] = false;
+    });
+
+    function update() {
+        moving = false;
+
+        if (keys.w) {
+            y -= speed;
+            direction = DIR.w;
+            moving = true;
+        }
+        if (keys.s) {
+            y += speed;
+            direction = DIR.s;
+            moving = true;
+        }
+        if (keys.a) {
+            x -= speed;
+            direction = DIR.a;
+            moving = true;
+        }
+        if (keys.d) {
+            x += speed;
+            direction = DIR.d;
+            moving = true;
+        }
+
+        x = Math.max(60, Math.min(window.innerWidth - 60, x));
+        y = Math.max(80, Math.min(window.innerHeight - 80, y));
+
+        tick++;
+        if (tick % 8 === 0) {
+            frame = (frame + 1) % 4;
+        }
+
+        if (moving) {
+            player.style.backgroundImage = 'url("run.png")';
+        } else {
+            player.style.backgroundImage = 'url("stand.png")';
+            frame = direction;
+        }
+
+        player.style.backgroundPosition = `-${direction * 120}px 0`;
+        player.style.left = x + "px";
+        player.style.top = y + "px";
+
+        requestAnimationFrame(update);
+    }
+
+    function openFullScreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) elem.requestFullscreen();
+        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    }
+
+    update();
+</script>
+
+</body>
+</html>
